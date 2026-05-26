@@ -51,13 +51,17 @@ class BrowserTab(QWidget):
         else:
             self.profile = QWebEngineProfile(profile_name)
         
-        # Настройки профиля
-        self.profile.setHttpUserAgent(
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/124.0.6367.91 Safari/537.36"
-        )
-        self.profile.setHttpAcceptLanguage("ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
+        # Настройки профиля: сохраняем данные как обычный браузер.
+        try:
+            self.profile.setHttpCacheType(QWebEngineProfile.HttpCacheType.DiskHttpCache)
+        except Exception:
+            pass
+        try:
+            self.profile.setPersistentCookiesPolicy(
+                QWebEngineProfile.PersistentCookiesPolicy.ForcePersistentCookies
+            )
+        except Exception:
+            pass
         
         # Настройки WebEngine
         settings = self.profile.settings()
@@ -199,15 +203,25 @@ class BrowserTab(QWidget):
         if not url:
             return
         
-        if not url.startswith(('http://', 'https://', 'about:', 'file://')):
-            url = 'https://' + url
-        
         self.navigate(url)
     
     def navigate(self, url: str):
         """Навигация на URL"""
-        self.url_bar.setText(url)
-        self.webview.load(QUrl(url))
+        qurl = self._normalize_url(url)
+        if not qurl.isValid():
+            self.status_label.setText("✗ Неверный URL")
+            return
+
+        self.url_bar.setText(qurl.toString())
+        self.webview.load(qurl)
+
+    @staticmethod
+    def _normalize_url(url: str) -> QUrl:
+        """Convert user input like google.com into a loadable QUrl."""
+        value = (url or "").strip()
+        if value.startswith(("about:", "data:", "file:", "blob:", "qrc:")):
+            return QUrl(value)
+        return QUrl.fromUserInput(value)
     
     def _on_url_changed(self, url: QUrl):
         """Обновление адресной строки"""

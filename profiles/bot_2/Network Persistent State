@@ -1,1 +1,1 @@
-{"net":{"http_server_properties":{"servers":[],"version":5},"network_qualities":{"CAISABiAgICA+P////8B":"4G"}}}
+{"net":{"http_server_properties":{"servers":[{"anonymization":[],"server":"https://rdap.db.ripe.net","supports_spdy":true},{"anonymization":[],"server":"https://tls.browserleaks.com","supports_spdy":true},{"anonymization":[],"server":"https://browserleaks.com","supports_spdy":true},{"anonymization":[],"server":"https://cartodb-basemaps-a.freetls.fastly.net","supports_spdy":true}],"version":5},"network_qualities":{"CAISABiAgICA+P////8B":"4G"}}}

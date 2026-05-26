@@ -25,6 +25,8 @@ from app.proxy_manager import ProxyManager
 from app.fingerprint_engine import FingerprintEngine
 from app.cookie_jar import CookieJar
 from app.human_emulator import HumanEmulator
+from app.security_audit import SecurityAudit
+from app.lab_server import LAB_PROFILES, LabServer
 
 
 class MainWindow(QMainWindow):
@@ -93,6 +95,8 @@ class MainWindow(QMainWindow):
         # Менеджеры
         self.profile_manager = ProfileManager("profiles")
         self.proxy_manager = ProxyManager("proxies/pool.json")
+        self.security_audit = SecurityAudit()
+        self.lab_server = None
         
         # Текущий профиль
         self.current_profile: Optional[BrowserProfile] = None
@@ -100,6 +104,7 @@ class MainWindow(QMainWindow):
         
         # Вкладки браузеров
         self.browser_tabs: Dict[str, BrowserTab] = {}
+        self.last_audit_report = None
         
         self._init_ui()
         self._create_menu()
@@ -216,7 +221,7 @@ class MainWindow(QMainWindow):
         • Эмуляция поведения человека (мышь, скролл, печать)<br>
         • Управление куками и сессиями<br>
         • Ротация прокси с проверкой здоровья<br>
-        • Обход CAPTCHA<br>
+        • Обнаружение CAPTCHA для ручного прохождения<br>
         • Мультиаккаунтинг<br>
         • Встроенные окна браузеров<br>
         </p>
@@ -307,6 +312,30 @@ class MainWindow(QMainWindow):
         
         # Инструменты
         tools_menu = menubar.addMenu("Инструменты")
+
+        lab_action = QAction("Запустить учебный стенд", self)
+        lab_action.triggered.connect(self._open_lab_stand)
+        tools_menu.addAction(lab_action)
+
+        stop_lab_action = QAction("Остановить учебный стенд", self)
+        stop_lab_action.triggered.connect(self._stop_lab_stand)
+        tools_menu.addAction(stop_lab_action)
+
+        tools_menu.addSeparator()
+
+        audit_action = QAction("Аудит текущей страницы", self)
+        audit_action.triggered.connect(self._run_security_audit)
+        tools_menu.addAction(audit_action)
+
+        behavior_action = QAction("Включить запись поведения", self)
+        behavior_action.triggered.connect(self._install_behavior_recorder)
+        tools_menu.addAction(behavior_action)
+
+        export_audit_action = QAction("Экспорт JSON-аудита", self)
+        export_audit_action.triggered.connect(self._export_security_audit)
+        tools_menu.addAction(export_audit_action)
+
+        tools_menu.addSeparator()
         
         stealth_action = QAction("Проверить стелс-режим", self)
         stealth_action.triggered.connect(self._check_stealth)
@@ -547,8 +576,9 @@ class MainWindow(QMainWindow):
         
         self.current_fingerprint = fp
         
-        # Стелс-скрипт
-        stealth_script = engine.get_stealth_script()
+        # JS-подмена fingerprint отключена по умолчанию: она ломает Cloudflare и
+        # современные приложения, если параметры не совпадают с реальным WebEngine.
+        stealth_script = ""
         
         # Создаём вкладку браузера
         tab_name = profile.name
@@ -564,7 +594,7 @@ class MainWindow(QMainWindow):
                 fingerprint_script=stealth_script
             )
             
-            # Подключаем авто-обход капчи
+            # Подключаем обнаружение капчи
             browser_tab.webview.loadFinished.connect(
                 lambda ok: self._on_page_loaded(ok, browser_tab)
             )
@@ -595,7 +625,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Ошибка", f"Не удалось создать вкладку браузера:\n{str(e)}")
     
     def _on_page_loaded(self, ok, browser_tab):
-        """Авто-обход CAPTCHA после загрузки страницы"""
+        """Detect CAPTCHA widgets after a page load."""
         if not ok:
             return
         
@@ -615,49 +645,7 @@ class MainWindow(QMainWindow):
     def _handle_captcha_detected(self, detected, browser_tab):
         """Обработка обнаруженной капчи"""
         if detected:
-            self.statusbar.showMessage("⚠️ Обнаружена CAPTCHA! Пытаюсь обойти...")
-            
-            # Кликаем по чекбоксу reCAPTCHA
-            browser_tab.page.runJavaScript("""
-                (function() {
-                    // Ищем iframe reCAPTCHA
-                    var frames = document.querySelectorAll('iframe[src*="recaptcha"]');
-                    for (var i = 0; i < frames.length; i++) {
-                        var rect = frames[i].getBoundingClientRect();
-                        if (rect.width > 0 && rect.height > 0) {
-                            // Кликаем по центру
-                            var event = new MouseEvent('click', {
-                                view: window,
-                                bubbles: true,
-                                cancelable: true,
-                                clientX: rect.x + rect.width/2,
-                                clientY: rect.y + rect.height/2
-                            });
-                            frames[i].dispatchEvent(event);
-                            return 'clicked';
-                        }
-                    }
-                    
-                    // Ищем контейнер reCAPTCHA
-                    var container = document.querySelector('.g-recaptcha');
-                    if (container) {
-                        var rect = container.getBoundingClientRect();
-                        var event = new MouseEvent('click', {
-                            view: window,
-                            bubbles: true,
-                            cancelable: true,
-                            clientX: rect.x + rect.width/2,
-                            clientY: rect.y + rect.height/2
-                        });
-                        container.dispatchEvent(event);
-                        return 'clicked';
-                    }
-                    
-                    return 'not_found';
-                })()
-            """, lambda result: self.statusbar.showMessage(
-                f"✓ Клик по капче: {result}" if result == 'clicked' else "✗ Капча не найдена для клика"
-            ))
+            self.statusbar.showMessage("⚠️ Обнаружена CAPTCHA. Пройдите проверку вручную во вкладке.")
         else:
             self.statusbar.showMessage("✓ Капча не обнаружена")
     
@@ -691,8 +679,30 @@ class MainWindow(QMainWindow):
         current_index = self.browser_tabs_widget.currentIndex()
         current_tab = self.browser_tabs_widget.widget(current_index)
         
+        if not hasattr(current_tab, 'navigate'):
+            profile = self._get_navigation_profile()
+            if not profile:
+                QMessageBox.warning(self, "Ошибка", "Сначала создайте профиль браузера")
+                return
+
+            self._load_profile(profile.id)
+            current_tab = self.browser_tabs_widget.currentWidget()
+
         if hasattr(current_tab, 'navigate'):
             current_tab.navigate(url)
+    
+    def _get_navigation_profile(self):
+        """Return selected profile or the first available profile for quick navigation."""
+        selected = self.profile_tree.selectedItems()
+        if selected:
+            profile_id = selected[0].data(0, Qt.ItemDataRole.UserRole)
+            if profile_id:
+                profile = self.profile_manager.get_profile(profile_id)
+                if profile:
+                    return profile
+
+        profiles = self.profile_manager.get_all_profiles()
+        return profiles[0] if profiles else None
     
     def _profile_context_menu(self, position):
         """Контекстное меню профиля"""
@@ -837,6 +847,186 @@ class MainWindow(QMainWindow):
         
         thread = threading.Thread(target=check, daemon=True)
         thread.start()
+
+    def _open_lab_stand(self, checked=False):
+        """Start the closed local lab target and open it in a browser profile."""
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Учебный стенд защиты")
+        dialog.setFixedSize(420, 190)
+
+        layout = QFormLayout(dialog)
+        profile_input = QComboBox()
+        for key, profile in LAB_PROFILES.items():
+            profile_input.addItem(profile["name"], key)
+        layout.addRow("Сценарий:", profile_input)
+
+        info = QLabel(
+            "Локальный сайт собирает fingerprint, storage, поведение и считает risk score. "
+            "Он предназначен для закрытой демонстрации с преподавателем."
+        )
+        info.setWordWrap(True)
+        layout.addRow(info)
+
+        btn_layout = QHBoxLayout()
+        start_btn = QPushButton("Открыть")
+        cancel_btn = QPushButton("Отмена")
+        btn_layout.addWidget(start_btn)
+        btn_layout.addWidget(cancel_btn)
+        layout.addRow(btn_layout)
+
+        def open_selected():
+            profile_key = profile_input.currentData()
+            dialog.accept()
+            self._start_lab_and_navigate(profile_key)
+
+        start_btn.clicked.connect(open_selected)
+        cancel_btn.clicked.connect(dialog.reject)
+        dialog.exec()
+
+    def _start_lab_and_navigate(self, profile_key="clean"):
+        """Open a lab URL in the current tab or create a profile tab first."""
+        if self.lab_server is None:
+            self.lab_server = LabServer()
+
+        try:
+            self.lab_server.start()
+        except OSError as e:
+            QMessageBox.critical(self, "Учебный стенд", f"Не удалось запустить локальный сервер:\n{e}")
+            return
+
+        url = self.lab_server.url(profile_key)
+        current_tab = self.browser_tabs_widget.currentWidget()
+        if not hasattr(current_tab, "navigate"):
+            profile = self._get_navigation_profile()
+            if not profile:
+                QMessageBox.warning(self, "Учебный стенд", "Сначала создайте профиль браузера.")
+                return
+            self._load_profile(profile.id)
+            current_tab = self.browser_tabs_widget.currentWidget()
+
+        if hasattr(current_tab, "navigate"):
+            current_tab.navigate(url)
+            self.statusbar.showMessage(f"Учебный стенд открыт: {url}")
+
+    def _stop_lab_stand(self, checked=False):
+        """Stop the local lab target."""
+        if self.lab_server:
+            self.lab_server.stop()
+            self.lab_server = None
+            self.statusbar.showMessage("Учебный стенд остановлен")
+        else:
+            self.statusbar.showMessage("Учебный стенд не запущен")
+
+    def _current_browser_tab(self):
+        """Return the active BrowserTab, or show a clear warning."""
+        current_index = self.browser_tabs_widget.currentIndex()
+        current_tab = self.browser_tabs_widget.widget(current_index)
+        if hasattr(current_tab, "page") and hasattr(current_tab, "webview"):
+            return current_tab
+
+        QMessageBox.warning(
+            self,
+            "Аудит страницы",
+            "Откройте профиль и загрузите сайт во вкладке браузера."
+        )
+        return None
+
+    def _install_behavior_recorder(self, checked=False):
+        """Install passive behavior event recording on the current page."""
+        browser_tab = self._current_browser_tab()
+        if not browser_tab:
+            return
+
+        self.statusbar.showMessage("Включаю запись поведения на текущей странице...")
+        browser_tab.page.runJavaScript(
+            self.security_audit.install_behavior_recorder_script(),
+            lambda result: self.statusbar.showMessage(
+                "Запись поведения включена" if result in ("installed", "already_installed")
+                else f"Не удалось включить запись поведения: {result}"
+            )
+        )
+
+    def _run_security_audit(self, checked=False, export=False):
+        """Collect defensive audit signals from the current page."""
+        browser_tab = self._current_browser_tab()
+        if not browser_tab:
+            return
+
+        self.statusbar.showMessage("Собираю аудит текущей страницы...")
+        browser_tab.page.runJavaScript(
+            self.security_audit.browser_signal_script(),
+            lambda report: self._on_security_audit_ready(report, browser_tab, export)
+        )
+
+    def _on_security_audit_ready(self, report, browser_tab, export=False):
+        """Attach behavior data and show or export the audit report."""
+        if not isinstance(report, dict):
+            QMessageBox.warning(self, "Аудит страницы", "Не удалось собрать данные страницы.")
+            self.statusbar.showMessage("Аудит не собран")
+            return
+
+        def finish(behavior):
+            if isinstance(behavior, dict):
+                report["behavior"] = behavior
+            else:
+                report["behavior"] = {"installed": False}
+
+            self.last_audit_report = report
+            if export:
+                path = self.security_audit.save_report(report)
+                self.statusbar.showMessage(f"Аудит сохранен: {path.resolve()}")
+                QMessageBox.information(self, "Экспорт аудита", f"Отчет сохранен:\n{path.resolve()}")
+            else:
+                self.statusbar.showMessage("Аудит текущей страницы собран")
+                self._show_audit_report(report)
+
+        browser_tab.page.runJavaScript(
+            self.security_audit.collect_behavior_script(),
+            finish
+        )
+
+    def _export_security_audit(self, checked=False):
+        """Export last audit, or collect a fresh one if needed."""
+        if self.last_audit_report:
+            path = self.security_audit.save_report(self.last_audit_report)
+            self.statusbar.showMessage(f"Аудит сохранен: {path.resolve()}")
+            QMessageBox.information(self, "Экспорт аудита", f"Отчет сохранен:\n{path.resolve()}")
+            return
+
+        self._run_security_audit(export=True)
+
+    def _show_audit_report(self, report):
+        """Show a readable audit report with raw JSON for lab verification."""
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Аудит текущей страницы")
+        dialog.resize(900, 700)
+
+        layout = QVBoxLayout(dialog)
+        text = QTextEdit()
+        text.setReadOnly(True)
+        text.setPlainText(
+            self.security_audit.format_report(report)
+            + "\n\nRAW JSON\n"
+            + json.dumps(report, ensure_ascii=False, indent=2)
+        )
+        layout.addWidget(text)
+
+        btn_layout = QHBoxLayout()
+        save_btn = QPushButton("Сохранить JSON")
+        close_btn = QPushButton("Закрыть")
+
+        def save_report():
+            path = self.security_audit.save_report(report)
+            self.statusbar.showMessage(f"Аудит сохранен: {path.resolve()}")
+            QMessageBox.information(dialog, "Экспорт аудита", f"Отчет сохранен:\n{path.resolve()}")
+
+        save_btn.clicked.connect(save_report)
+        close_btn.clicked.connect(dialog.accept)
+        btn_layout.addWidget(save_btn)
+        btn_layout.addWidget(close_btn)
+        layout.addLayout(btn_layout)
+
+        dialog.exec()
     
     def _check_stealth(self):
         """Проверка стелс-режима"""
@@ -960,9 +1150,9 @@ class MainWindow(QMainWindow):
             <p><b>Возможности:</b></p>
             <ul>
                 <li>Изолированные профили (Multilogin/GoLogin/AdsPower)</li>
-                <li>Подмена fingerprint (Canvas/WebGL/Audio)</li>
-                <li>Эмуляция поведения человека</li>
-                <li>Мультиаккаунтинг</li>
+                <li>Аудит fingerprint (Canvas/WebGL/Audio)</li>
+                <li>Запись поведенческих сигналов</li>
+                <li>Локальный учебный стенд с risk scoring</li>
                 <li>Встроенные окна браузеров</li>
             </ul>
             <p><i>Для образовательных целей и тестирования.</i></p>

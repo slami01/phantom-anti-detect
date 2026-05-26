@@ -1,0 +1,85 @@
+{
+  "report": {
+    "collectedAt": "2026-05-26T13:19:49.010Z",
+    "profileKey": "clean",
+    "declaredProfile": {
+      "name": "Clean residential profile",
+      "declared_os": "Windows",
+      "declared_timezone": "Asia/Tashkent",
+      "declared_language": "ru-RU",
+      "network": "residential",
+      "ip_reputation": "trusted",
+      "asn_type": "isp",
+      "notes": "Low-risk baseline profile for the lab target."
+    },
+    "browser": {
+      "url": "http://127.0.0.1:8767/?profile=clean",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/6.11.1 Chrome/140.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "webdriver": false,
+      "languages": [
+        "ru"
+      ],
+      "language": "ru",
+      "hardwareConcurrency": 12,
+      "deviceMemory": 8,
+      "maxTouchPoints": 0,
+      "cookieEnabled": true,
+      "timezone": "Asia/Tashkent",
+      "timezoneOffset": -300,
+      "screen": {
+        "width": 1536,
+        "height": 864,
+        "availWidth": 1536,
+        "availHeight": 864,
+        "dpr": 1.25,
+        "innerWidth": 0,
+        "innerHeight": 0
+      },
+      "webgl": {
+        "supported": true,
+        "vendor": "WebKit",
+        "renderer": "WebKit WebGL",
+        "unmaskedVendor": "Google Inc. (Intel)",
+        "unmaskedRenderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x0000A7A1) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+      },
+      "canvasHash": "e4f3dbc9",
+      "storage": {
+        "cookieLength": 20,
+        "localStorageKeys": 1,
+        "sessionStorageKeys": 0,
+        "indexedDB": true,
+        "serviceWorker": true,
+        "cacheStorage": true
+      }
+    },
+    "behavior": {
+      "durationMs": 198,
+      "events": {
+        "mousemove": 0,
+        "click": 0,
+        "wheel": 0,
+        "scroll": 0,
+        "keydown": 0,
+        "focus": 0,
+        "blur": 0
+      },
+      "mouseSummary": {
+        "points": 0,
+        "distance": 0,
+        "durationMs": 0
+      },
+      "clickSamples": [],
+      "keySamples": [],
+      "scrollSamples": []
+    }
+  },
+  "result": {
+    "score": 0,
+    "verdict": "Low risk: allow in this lab model",
+    "reasons": [
+      "No high-risk lab signals detected"
+    ],
+    "scoredAt": "2026-05-26T18:19:49.234209"
+  }
+}
