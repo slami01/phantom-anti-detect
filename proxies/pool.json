@@ -1,0 +1,54 @@
+{
+  "proxies": [
+    {
+      "host": "20.111.54.16",
+      "port": 80,
+      "username": null,
+      "password": null,
+      "protocol": "http",
+      "country": "France",
+      "asn": "AS8075",
+      "provider": "Microsoft Azure"
+    },
+    {
+      "host": "20.210.113.32",
+      "port": 80,
+      "username": null,
+      "password": null,
+      "protocol": "http",
+      "country": "Netherlands",
+      "asn": "AS8075",
+      "provider": "Microsoft Azure"
+    },
+    {
+      "host": "47.74.46.81",
+      "port": 80,
+      "username": null,
+      "password": null,
+      "protocol": "http",
+      "country": "Japan",
+      "asn": "AS45102",
+      "provider": "Alibaba Cloud"
+    },
+    {
+      "host": "47.88.58.100",
+      "port": 80,
+      "username": null,
+      "password": null,
+      "protocol": "http",
+      "country": "Singapore",
+      "asn": "AS45102",
+      "provider": "Alibaba Cloud"
+    },
+    {
+      "host": "20.219.178.121",
+      "port": 80,
+      "username": null,
+      "password": null,
+      "protocol": "http",
+      "country": "India",
+      "asn": "AS8075",
+      "provider": "Microsoft Azure"
+    }
+  ]
+}

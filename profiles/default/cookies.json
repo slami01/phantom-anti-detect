@@ -1,0 +1,49 @@
+{
+  "cookies": [
+    {
+      "name": "_ga",
+      "value": "GA1.2.1234567890.1700000000",
+      "domain": ".example.com",
+      "path": "/",
+      "expires": 1800000000,
+      "http_only": false,
+      "secure": true,
+      "same_site": "Lax",
+      "first_seen": 1700000000,
+      "last_seen": 1710000000,
+      "hit_count": 42
+    },
+    {
+      "name": "_gid",
+      "value": "GA1.2.987654321.1710000000",
+      "domain": ".example.com",
+      "path": "/",
+      "expires": 1710086400,
+      "http_only": false,
+      "secure": true,
+      "same_site": "Lax",
+      "first_seen": 1705000000,
+      "last_seen": 1710000000,
+      "hit_count": 28
+    },
+    {
+      "name": "session_id",
+      "value": "abc123def456ghi789",
+      "domain": ".example.com",
+      "path": "/",
+      "expires": 1710172800,
+      "http_only": true,
+      "secure": true,
+      "same_site": "Strict",
+      "first_seen": 1700000000,
+      "last_seen": 1710000000,
+      "hit_count": 156
+    }
+  ],
+  "history": [
+    {"url": "https://www.google.com", "title": "Google", "timestamp": 1700000000},
+    {"url": "https://www.github.com", "title": "GitHub", "timestamp": 1700100000},
+    {"url": "https://stackoverflow.com", "title": "Stack Overflow", "timestamp": 1700200000}
+  ],
+  "saved_at": "2025-01-15T12:00:00"
+}

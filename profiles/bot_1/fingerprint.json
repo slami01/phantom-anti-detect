@@ -1,0 +1,71 @@
+{
+  "os": "Windows 10",
+  "platform": "Win32",
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.91 Safari/537.36",
+  "app_version": "",
+  "screen_width": 1366,
+  "screen_height": 768,
+  "avail_width": 1366,
+  "avail_height": 728,
+  "color_depth": 24,
+  "pixel_ratio": 1.0,
+  "timezone": "Europe/London",
+  "timezone_offset": 0,
+  "locale": "ru_RU",
+  "language": "ru-RU;q=1.0,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+  "languages": [
+    "ru-RU",
+    "ru",
+    "en-US",
+    "en"
+  ],
+  "hardware_concurrency": 12,
+  "device_memory": 32,
+  "max_touch_points": 0,
+  "webgl_vendor": "Intel",
+  "webgl_renderer": "Intel Iris Xe Graphics",
+  "webgl2_max_texture_size": 16384,
+  "webgl2_max_viewport_dims": [
+    16384,
+    16384
+  ],
+  "audio_vendor": "Google Inc.",
+  "audio_sample_rate": 44100,
+  "audio_noise": 0.001597962345816052,
+  "canvas_noise": 0.0011445591247243522,
+  "canvas_hash": "0c8393ba1a5f382c",
+  "fonts": [
+    "Arial",
+    "Arial Black",
+    "Arial Narrow",
+    "Book Antiqua",
+    "Calibri",
+    "Cambria",
+    "Century Gothic",
+    "Comic Sans MS",
+    "Consolas",
+    "Courier New",
+    "Georgia",
+    "Helvetica",
+    "Impact",
+    "Lucida Console",
+    "Palatino Linotype",
+    "Segoe UI",
+    "Tahoma",
+    "Times New Roman",
+    "Trebuchet MS",
+    "Verdana",
+    "Wingdings"
+  ],
+  "webrtc_private_ips": false,
+  "do_not_track": null,
+  "plugins": [
+    "Chrome PDF Plugin",
+    "Chrome PDF Viewer",
+    "Native Client"
+  ],
+  "mime_types": [
+    "application/pdf",
+    "text/pdf"
+  ]
+}

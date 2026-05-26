@@ -1,0 +1,61 @@
+{
+  "profiles": [
+    {
+      "id": "default",
+      "name": "Default",
+      "group": "Default",
+      "created_at": "2025-01-01T00:00:00",
+      "last_used": "2025-01-15T12:00:00",
+      "is_active": true,
+      "browser_type": "chromium",
+      "proxy_host": null,
+      "proxy_port": null,
+      "proxy_username": null,
+      "proxy_password": null,
+      "fingerprint_template": "windows_desktop",
+      "notes": "\u0420\u045b\u0421\u0403\u0420\u0405\u0420\u0455\u0420\u0406\u0420\u0405\u0420\u0455\u0420\u2116 \u0420\u0457\u0421\u0402\u0420\u0455\u0421\u201e\u0420\u0451\u0420\u00bb\u0421\u040a",
+      "tags": [
+        "main",
+        "windows"
+      ]
+    },
+    {
+      "id": "bot_1",
+      "name": "Bot Worker 1",
+      "group": "Bots",
+      "created_at": "2025-01-10T10:00:00",
+      "last_used": null,
+      "is_active": true,
+      "browser_type": "chromium",
+      "proxy_host": "20.111.54.16",
+      "proxy_port": 80,
+      "proxy_username": null,
+      "proxy_password": null,
+      "fingerprint_template": "random",
+      "notes": "\u0420\u2018\u0420\u0455\u0421\u201a \u0421\u0403 \u0421\u201e\u0421\u0402\u0420\u00b0\u0420\u0405\u0421\u2020\u0421\u0453\u0420\u00b7\u0421\u0403\u0420\u0454\u0420\u0451\u0420\u0458 \u0420\u0457\u0421\u0402\u0420\u0455\u0420\u0454\u0421\u0403\u0420\u0451",
+      "tags": [
+        "bot",
+        "france"
+      ]
+    },
+    {
+      "id": "bot_2",
+      "name": "Bot Worker 2",
+      "group": "Bots",
+      "created_at": "2025-01-10T11:00:00",
+      "last_used": null,
+      "is_active": true,
+      "browser_type": "chromium",
+      "proxy_host": "47.74.46.81",
+      "proxy_port": 80,
+      "proxy_username": null,
+      "proxy_password": null,
+      "fingerprint_template": "random",
+      "notes": "\u0420\u2018\u0420\u0455\u0421\u201a \u0421\u0403 \u0421\u040f\u0420\u0457\u0420\u0455\u0420\u0405\u0421\u0403\u0420\u0454\u0420\u0451\u0420\u0458 \u0420\u0457\u0421\u0402\u0420\u0455\u0420\u0454\u0421\u0403\u0420\u0451",
+      "tags": [
+        "bot",
+        "japan"
+      ]
+    }
+  ]
+}

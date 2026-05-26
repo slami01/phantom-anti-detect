@@ -1,0 +1,14 @@
+PyQt6>=6.5.0
+PyQt6-WebEngine>=6.5.0
+playwright>=1.40.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+fake-useragent>=1.4.0
+pydantic>=2.5.0
+aiohttp>=3.9.0
+aiofiles>=23.2.0
+cryptography>=41.0.0
+Pillow>=10.1.0
+qt-material>=2.14
+qasync>=0.27.0
